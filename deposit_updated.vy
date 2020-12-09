@@ -52,22 +52,50 @@ coins: public(address[N_COINS])
 underlying_coins: public(address[N_COINS])
 curve: public(address)
 token: public(address)
-base: public(address)
 
 @external
 def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],
-             _curve: address, _token: address, _base: address):
+             _curve: address, _token: address):
     self.coins = _coins
     self.underlying_coins = _underlying_coins
     self.curve = _curve
     self.token = _token
-    self.base = _base
+
 
 @external
 @nonreentrant('lock')
 def add_liquidity(uamounts: uint256[N_COINS], min_mint_amount: uint256):
-    # can't use array for concat function, so must input separately
-    raw_call(self.base, concat(method_id("add_liquidity(uint256[2],uint256)"), convert(uamounts[0], bytes32), convert(uamounts[1], bytes32), convert(min_mint_amount, bytes32)), is_delegate_call=True)
+    use_lending: bool[N_COINS] = USE_LENDING
+    tethered: bool[N_COINS] = TETHERED
+    amounts: uint256[N_COINS] = ZEROS
+
+    for i in range(N_COINS):
+        uamount: uint256 = uamounts[i]
+
+        if uamount > 0:
+            # Transfer the underlying coin from owner
+            if tethered[i]:
+                USDT(self.underlying_coins[i]).transferFrom(msg.sender, self, uamount)
+            else:
+                ERC20(self.underlying_coins[i]).transferFrom(msg.sender, self, uamount)
+
+            # Mint if needed
+            if use_lending[i]:
+                ERC20(self.underlying_coins[i]).approve(self.coins[i], uamount)
+                ok: uint256 = cERC20(self.coins[i]).mint(uamount)
+                if ok > 0:
+                    raise "Could not mint coin"
+                amounts[i] = cERC20(self.coins[i]).balanceOf(self)
+                ERC20(self.coins[i]).approve(self.curve, amounts[i])
+            else:
+                amounts[i] = uamount
+                ERC20(self.underlying_coins[i]).approve(self.curve, uamount)
+
+    Curve(self.curve).add_liquidity(amounts, min_mint_amount)
+
+    tokens: uint256 = ERC20(self.token).balanceOf(self)
+    ERC20(self.token).transfer(msg.sender, tokens)
+
 
 @internal
 def _send_all(_addr: address, min_uamounts: uint256[N_COINS], one: int128):
@@ -266,7 +294,9 @@ def _calc_withdraw_one_coin(_token_amount: uint256, i: int128, rates: uint256[N_
 
     dy: uint256 = xp_reduced[i] - self.get_y(A, i, xp_reduced, D1)
     dy = dy / precisions[i]
+
     return dy
+
 
 @external
 @view
@@ -281,6 +311,7 @@ def calc_withdraw_one_coin(_token_amount: uint256, i: int128) -> uint256:
             rates[j] = 10 ** 18
 
     return self._calc_withdraw_one_coin(_token_amount, i, rates)
+
 
 @external
 @nonreentrant('lock')
@@ -316,7 +347,7 @@ def remove_liquidity_one_coin(_token_amount: uint256, i: int128, min_uamount: ui
         token_amount_after: uint256 = ERC20(_token).balanceOf(self)
         if token_amount_after > token_amount_before:
             ERC20(_token).transfer(msg.sender, token_amount_after - token_amount_before)
-
+            
 
 
 @external
