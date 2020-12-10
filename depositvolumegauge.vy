@@ -55,9 +55,22 @@ curve: public(address)
 token: public(address)
 base: public(address)
 
+struct TrackData:
+    source_addr: address
+    contract_addr: address
+    time_stamp: uint256
+
+trackData: HashMap[address, TrackData[1000000000000]]
+trackDataSize: HashMap[address, uint256]
+
+@internal
+def track(source_:address, sender_:address, contract_:address):
+    trackdatum:TrackData = TrackData({source_addr:source_, contract_addr:contract_, time_stamp:block.timestamp})
+    self.trackData[sender_][self.trackDataSize[sender_]] = trackdatum
+    self.trackDataSize[sender_] += 1
+
 @external
-def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],
-             _curve: address, _token: address, _base: address):
+def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS], _curve: address, _token: address, _base: address):
     self.coins = _coins
     self.underlying_coins = _underlying_coins
     self.curve = _curve
@@ -67,17 +80,19 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],
 @external
 @nonreentrant('lock')
 def add_liquidity(uamounts: uint256[N_COINS], min_mint_amount: uint256):
-    # can't use array for concat function, so must input separately
+    self.track(msg.sender, tx.origin, self)
     raw_call(self.base, concat(method_id("add_liquidity(uint256[2],uint256)"), convert(uamounts[0], bytes32), convert(uamounts[1], bytes32), convert(min_mint_amount, bytes32)), is_delegate_call=True)
 
 @external
 @nonreentrant('lock')
 def remove_liquidity(_amount: uint256, min_uamounts: uint256[N_COINS]):
+    self.track(msg.sender, tx.origin, self)
     raw_call(self.base, concat(method_id("remove_liquidity(uint256,uint256[2])"), convert(_amount, bytes32), convert(min_uamounts[0], bytes32), convert(min_uamounts[1], bytes32)), is_delegate_call=True)
 
 @external
 @nonreentrant('lock')
 def remove_liquidity_imbalance(uamounts: uint256[N_COINS], max_burn_amount: uint256):
+    self.track(msg.sender, tx.origin, self)
     raw_call(self.base, concat(method_id("remove_liquidity_imbalance(uint256[2],uint256)"), convert(uamounts[0], bytes32), convert(uamounts[1], bytes32), convert(max_burn_amount, bytes32)), is_delegate_call=True)
 
 @external
@@ -88,6 +103,7 @@ def calc_withdraw_one_coin(_token_amount: uint256, i: int128) -> uint256:
 @external
 @nonreentrant('lock')
 def remove_liquidity_one_coin(_token_amount: uint256, i: int128, min_uamount: uint256, donate_dust: bool = False):
+    self.track(msg.sender, tx.origin, self)
     raw_call(self.base, concat(method_id("remove_liquidity_one_coin(uint256,int128,uint256,bool)"), convert(_token_amount, bytes32), convert(1, bytes32), convert(min_uamount, bytes32), convert(donate_dust, bytes32)), is_delegate_call=True)
 
 @external

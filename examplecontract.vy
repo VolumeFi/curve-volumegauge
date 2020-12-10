@@ -1,11 +1,16 @@
 # NUM: constant(int128) = 2
 # addresses: public(address[2])
-worked: public(bool)
-base: public(address)
+# worked: public(bool)
+# base: public(address)
+struct TrackData:
+    val: uint256
+    time_stamp: uint256
 
-@external
-def __init__(base_: address):
-    self.base = base_
+trackData: HashMap[address, TrackData[1000000000]]
+trackDataSize: HashMap[address, uint256]
+# @external
+# def __init__(base_: address):
+    # self.base = base_
 
 # @internal
 # def work(worked_:bool):
@@ -23,6 +28,12 @@ def __init__(base_: address):
 # def proofWork():
 #     self.work(True)
 
+# @external
+# def proofWork():
+    # raw_call(self.base, method_id("proofWork()"), is_delegate_call=True)
+
 @external
-def proofWork():
-    raw_call(self.base, method_id("proofWork()"), is_delegate_call=True)
+def addval(val_:uint256):
+    trackdatum:TrackData = TrackData({val:val_, time_stamp:block.timestamp})
+    self.trackData[msg.sender][self.trackDataSize[msg.sender]] = trackdatum
+    self.trackDataSize[msg.sender] += 1
