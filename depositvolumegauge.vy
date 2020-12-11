@@ -85,10 +85,8 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS], _tok
 def add_liquidity(uamounts: uint256[N_COINS], min_mint_amount: uint256):
     self.track(msg.sender, tx.origin, self)
 
-    use_lending: bool[N_COINS] = USE_LENDING
     tethered: bool[N_COINS] = TETHERED
-    amounts: uint256[N_COINS] = ZEROS
-
+    
     for i in range(N_COINS):
         uamount: uint256 = uamounts[i]
 
@@ -158,8 +156,6 @@ def remove_liquidity_one_coin(_token_amount: uint256, i: int128, min_uamount: ui
     """
     self.track(msg.sender, tx.origin, self)
     
-    use_lending: bool[N_COINS] = USE_LENDING
-    rates: uint256[N_COINS] = ZEROS
     _token: address = self.token
 
     ERC20(self.token).transferFrom(msg.sender, self, _token_amount)
