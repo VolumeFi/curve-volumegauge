@@ -1,4 +1,10 @@
 struct TrackData:
+    tokenx: address
+    pricex: uint256
+    amountx: uint256
+    tokeny: address
+    pricey: uint256
+    amounty: uint256
     source_addr: address
     contract_addr: address
     time_stamp: uint256
@@ -19,8 +25,16 @@ def addGauge(_gauge: address):
     self.gauges[_gauge] = True
 
 @external
-def track(source_:address, sender_:address, contract_:address):
+def track(_sender: address,
+    _tokenx: address,
+    _pricex: uint256,
+    _amountx: uint256,
+    _tokeny: address,
+    _pricey: uint256,
+    _amounty: uint256,
+    _source_addr: address,
+    _contract_addr: address):
     assert self.gauges[msg.sender] == True
-    trackdatum:TrackData = TrackData({source_addr:source_, contract_addr:contract_, time_stamp:block.timestamp})
-    self.trackData[sender_][self.trackDataSize[sender_]] = trackdatum
-    self.trackDataSize[sender_] += 1
+    trackdatum:TrackData = TrackData({tokenx: _tokenx, pricex: _pricex, amountx: _amountx, tokeny: _tokeny, pricey: _pricey, amounty: _amounty, source_addr: _source_addr, contract_addr: _contract_addr, time_stamp: block.timestamp})
+    self.trackData[_sender][self.trackDataSize[_sender]] = trackdatum
+    self.trackDataSize[_sender] += 1
