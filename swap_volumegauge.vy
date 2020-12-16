@@ -38,7 +38,8 @@ N_COINS: constant(int128) = 2  # <- change
 USE_LENDING: constant(bool[N_COINS]) = [True, True]
 TETHERED: constant(bool[N_COINS]) = [False, False]
 ETHAGGREGATOR: constant(address) = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-# 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 ETH / USD
+# mainnet 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 ETH / USD
+# rinkeby 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e ETH / USD
 
 # Events
 event TokenExchange:
@@ -76,6 +77,10 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggr
     self.base = _base
     self.tracker = Tracker(_tracker)
 
+##### mainnet #####
+# base
+# 0xA2B47E3D5c44877cca798226B7B8118F9BFb7A56
+#
 # coins
 # 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643 cDAI
 # 0x39AA39c021dfbaE8faC545936693aC917d5E7563 cUSDC
@@ -88,6 +93,21 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggr
 # 0x773616E4d11A78F511299002da57A0a94577F1f4 DAI / ETH
 # 0x986b5E1e1755e3C2440e960477f25201B0a8bbD4 USDC / ETH
 
+##### rinkeby #####
+# base
+# 0xA319E978505b19b5E145436Cc040c12E70e1840b
+#
+# coins
+# 0x6D7F0754FFeb405d23C51CE938289d4835bE3b14 cDAI
+# 0x5B281A6DdA0B271e91ae35DE655Ad301C976edb1 cUSDC
+#
+# underlying coins
+# 0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa DAI
+# 0x4DBCdF9B62e891a7cec5A2568C3F4FAF9E8Abe2b USDC
+#
+# aggregators
+# 0x74825DbC8BF76CC4e9494d0ecB210f676Efa001D DAI / ETH
+# 0xdCA36F27cbC4E38aE16C4E9f99D39b42337F6dcf USDC / ETH
 
 @external
 @nonreentrant('lock')
