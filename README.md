@@ -10,6 +10,12 @@ Volume Gauges for DeFi
 
 3. Deploy with parameters (cDAI, cUSDC, DAI, USDC, DAI/ETH Aggregator, USDC/ETH Aggregator, swap contract, volumegaugetracker)
 
+- Confirm code for constant of eth/usd aggregator address
+
+  `ETHAGGREGATOR: constant(address) = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`
+
+- constructor parameters
+
 ```bash
 Coins
     0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643 cDAI
@@ -39,7 +45,17 @@ Base
 
 1. Deploy volumegaugetracker.vy
 
-2. Deploy swap_volumegauge.vy (update code for constant of eth/usd aggregator address)
+2. Deploy swap_volumegauge.vy
+
+- Update code for constant of eth/usd aggregator address
+
+  `ETHAGGREGATOR: constant(address) = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`
+
+  to
+
+  `ETHAGGREGATOR: constant(address) = 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e`
+
+- constructor parameters
 
 ```bash
 Coins
