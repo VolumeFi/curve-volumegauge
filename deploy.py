@@ -1,7 +1,7 @@
 from web3 import Web3
 import os
 
-w3 = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/215683e3c72049ed85a4b6a629da9629"))
+w3 = Web3(Web3.HTTPProvider(''))
 privateKey = ''
 filename = 'swap_volumegauge.vy'
 #filename = 'volumegaugetracker.vy'
