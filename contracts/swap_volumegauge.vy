@@ -38,9 +38,8 @@ interface Aggregator:
 N_COINS: constant(int128) = 2  # <- change
 USE_LENDING: constant(bool[N_COINS]) = [True, True]
 TETHERED: constant(bool[N_COINS]) = [False, False]
-ETHAGGREGATOR: constant(address) = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-# mainnet 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 ETH / USD
-# rinkeby 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e ETH / USD
+
+
 
 # Events
 event TokenExchange:
@@ -62,9 +61,9 @@ underlying_coins: public(address[N_COINS])
 base: public(address)
 tracker: public(Tracker)
 aggregators: public(address[N_COINS])
-
+ethaggregator: public(address)
 @external
-def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggregators: address[N_COINS], _base: address, _tracker: address):
+def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggregators: address[N_COINS], _ethaggregator: address, _base: address, _tracker: address):
     """
     _coins: Addresses of ERC20 conracts of coins (c-tokens) involved
     _underlying_coins: Addresses of plain coins (ERC20)
@@ -73,6 +72,7 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggr
         assert _coins[i] != ZERO_ADDRESS
         assert _underlying_coins[i] != ZERO_ADDRESS
     self.aggregators = _aggregators
+    self.ethaggregator = _ethaggregator
     self.coins = _coins
     self.underlying_coins = _underlying_coins
     self.base = _base
@@ -93,7 +93,11 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggr
 # aggregators
 # 0x773616E4d11A78F511299002da57A0a94577F1f4 DAI / ETH
 # 0x986b5E1e1755e3C2440e960477f25201B0a8bbD4 USDC / ETH
-
+#
+# ethaggregator
+# 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 ETH / USD
+#
+#
 ##### rinkeby #####
 # base
 # 0xA319E978505b19b5E145436Cc040c12E70e1840b
@@ -109,6 +113,9 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggr
 # aggregators
 # 0x74825DbC8BF76CC4e9494d0ecB210f676Efa001D DAI / ETH
 # 0xdCA36F27cbC4E38aE16C4E9f99D39b42337F6dcf USDC / ETH
+#
+# ethaggregator
+# 0x8A753747A1Fa494EC906cE90E9f37563A8AF630e ETH / USD
 
 @external
 @nonreentrant('lock')
@@ -135,7 +142,7 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
 
     pricex: uint256 = convert(Aggregator(self.aggregators[i]).latestAnswer(), uint256)
     pricey: uint256 = convert(Aggregator(self.aggregators[j]).latestAnswer(), uint256)
-    priceeth: uint256 = convert(Aggregator(ETHAGGREGATOR).latestAnswer(), uint256) # decimals : 8
+    priceeth: uint256 = convert(Aggregator(self.ethaggregator).latestAnswer(), uint256) # decimals : 8
     pricex = pricex * priceeth / (10 ** 18) # USD price per token
     pricey = pricey * priceeth / (10 ** 18) # USD price per token
 
@@ -174,7 +181,7 @@ def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
 
     pricex: uint256 = convert(Aggregator(self.aggregators[i]).latestAnswer(), uint256)
     pricey: uint256 = convert(Aggregator(self.aggregators[j]).latestAnswer(), uint256)
-    priceeth: uint256 = convert(Aggregator(ETHAGGREGATOR).latestAnswer(), uint256)
+    priceeth: uint256 = convert(Aggregator(self.ethaggregator).latestAnswer(), uint256)
     pricex = pricex * priceeth / (10 ** 18)
     pricey = pricey * priceeth / (10 ** 18)
     self.tracker.track(tx.origin, self.underlying_coins[i], pricex, dx, self.underlying_coins[j], pricey, dy, msg.sender, self.base)
