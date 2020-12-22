@@ -1,3 +1,4 @@
+# @version ^0.2.0
 # (c) Curve.Fi, 2020
 
 # External Contracts

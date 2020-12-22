@@ -1,3 +1,4 @@
+# @version ^0.2.0
 struct TrackData:
     tokenx: address
     pricex: uint256
