@@ -122,23 +122,25 @@ def __init__(_coins: address[N_COINS], _underlying_coins: address[N_COINS],_aggr
 def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     tethered: bool[N_COINS] = TETHERED
     use_lending: bool[N_COINS] = USE_LENDING
+    _coins: address[N_COINS] = self.coins
+    _base:address =  self.base
 
     if tethered[i] and not use_lending[i]:
-        USDT(self.coins[i]).transferFrom(msg.sender, self, dx)
-        USDT(self.coins[i]).approve(self.base, dx)
+        USDT(_coins[i]).transferFrom(msg.sender, self, dx)
+        USDT(_coins[i]).approve(_base, dx)
     else:
-        cERC20(self.coins[i]).transferFrom(msg.sender, self, dx)
-        cERC20(self.coins[i]).approve(self.base, dx)
+        cERC20(_coins[i]).transferFrom(msg.sender, self, dx)
+        cERC20(_coins[i]).approve(_base, dx)
 
-    SWAP(self.base).exchange(i, j, dx, min_dy)
+    SWAP(_base).exchange(i, j, dx, min_dy)
 
     dy: uint256 = 0
     if tethered[j] and not use_lending[j]:
-        dy = USDT(self.coins[j]).balanceOf(self)
-        USDT(self.coins[j]).transfer(msg.sender, dy)
+        dy = USDT(_coins[j]).balanceOf(self)
+        USDT(_coins[j]).transfer(msg.sender, dy)
     else:
-        dy = cERC20(self.coins[j]).balanceOf(self)
-        cERC20(self.coins[j]).transfer(msg.sender, dy)
+        dy = cERC20(_coins[j]).balanceOf(self)
+        cERC20(_coins[j]).transfer(msg.sender, dy)
 
     pricex: uint256 = convert(Aggregator(self.aggregators[i]).latestAnswer(), uint256)
     pricey: uint256 = convert(Aggregator(self.aggregators[j]).latestAnswer(), uint256)
@@ -146,11 +148,11 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     pricex = pricex * priceeth / (10 ** 18) # USD price per token
     pricey = pricey * priceeth / (10 ** 18) # USD price per token
 
-    exchangeratex: uint256 = cERC20(self.coins[i]).exchangeRateStored() / (10 ** ERC20(self.underlying_coins[i]).decimals())
-    exchangeratey: uint256 = cERC20(self.coins[j]).exchangeRateStored() / (10 ** ERC20(self.underlying_coins[j]).decimals())
+    exchangeratex: uint256 = cERC20(_coins[i]).exchangeRateStored() / (10 ** ERC20(self.underlying_coins[i]).decimals())
+    exchangeratey: uint256 = cERC20(_coins[j]).exchangeRateStored() / (10 ** ERC20(self.underlying_coins[j]).decimals())
     pricex = pricex * exchangeratex / 10 ** 10 # ExchangeRate decimals : 10
     pricey = pricey * exchangeratey / 10 ** 10 # ExchangeRate decimals : 10
-    self.tracker.track(tx.origin, self.coins[i], pricex, dx, self.coins[j], pricey, dy, msg.sender, self.base)
+    self.tracker.track(tx.origin, _coins[i], pricex, dx, _coins[j], pricey, dy, msg.sender, _base)
 
     log TokenExchange(msg.sender, i, dx, j, dy)
 
@@ -159,30 +161,31 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
 def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
     use_lending: bool[N_COINS] = USE_LENDING
     tethered: bool[N_COINS] = TETHERED
-
+    _underlying_coins: address[N_COINS] = self.underlying_coins
+    _base: address = self.base
     ok: uint256 = 0
     if tethered[i]:
-        USDT(self.underlying_coins[i]).transferFrom(msg.sender, self, dx)
-        USDT(self.underlying_coins[i]).approve(self.base, dx)
+        USDT(_underlying_coins[i]).transferFrom(msg.sender, self, dx)
+        USDT(_underlying_coins[i]).approve(_base, dx)
     else:
-        ERC20(self.underlying_coins[i]).transferFrom(msg.sender, self, dx)
-        ERC20(self.underlying_coins[i]).approve(self.base, dx)
+        ERC20(_underlying_coins[i]).transferFrom(msg.sender, self, dx)
+        ERC20(_underlying_coins[i]).approve(_base, dx)
 
-    SWAP(self.base).exchange_underlying(i, j, dx, min_dy)
+    SWAP(_base).exchange_underlying(i, j, dx, min_dy)
 
     dy: uint256 = 0
 
     if tethered[j]:
-        dy = USDT(self.underlying_coins[j]).balanceOf(self)
-        USDT(self.underlying_coins[j]).transfer(msg.sender, dy)
+        dy = USDT(_underlying_coins[j]).balanceOf(self)
+        USDT(_underlying_coins[j]).transfer(msg.sender, dy)
     else:
-        dy = ERC20(self.underlying_coins[j]).balanceOf(self)
-        ERC20(self.underlying_coins[j]).transfer(msg.sender, dy)
+        dy = ERC20(_underlying_coins[j]).balanceOf(self)
+        ERC20(_underlying_coins[j]).transfer(msg.sender, dy)
 
     pricex: uint256 = convert(Aggregator(self.aggregators[i]).latestAnswer(), uint256)
     pricey: uint256 = convert(Aggregator(self.aggregators[j]).latestAnswer(), uint256)
     priceeth: uint256 = convert(Aggregator(self.ethaggregator).latestAnswer(), uint256)
     pricex = pricex * priceeth / (10 ** 18)
     pricey = pricey * priceeth / (10 ** 18)
-    self.tracker.track(tx.origin, self.underlying_coins[i], pricex, dx, self.underlying_coins[j], pricey, dy, msg.sender, self.base)
+    self.tracker.track(tx.origin, _underlying_coins[i], pricex, dx, _underlying_coins[j], pricey, dy, msg.sender, _base)
     log TokenExchangeUnderlying(msg.sender, i, dx, j, dy)
