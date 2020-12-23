@@ -167,7 +167,7 @@ def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
     else:
         ERC20(self.underlying_coins[i]).transferFrom(msg.sender, self, dx)
         ERC20(self.underlying_coins[i]).approve(self.base, dx)
-    
+
     SWAP(self.base).exchange_underlying(i, j, dx, min_dy)
 
     dy: uint256 = 0
