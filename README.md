@@ -1,6 +1,11 @@
-# volumegauge
+# DeFi volumegauge
 
-Volume Gauges for DeFi 
+Volume Gauges for DeFi aim to solve the problem: How to incentivize marketing partners to drive more liquidity providers to their pools using the pool rewards without a centralized affiliate marketing budget?
+
+VolumeGauges track affiliate performance and rewards them from the pool rewards.
+
+VolumeGauges for Curve contracts allow the Curve ecosystem to make proposals that distribute rewards to the affiliate that drive exchange volume through the pool. The affiliate may in turn reward LPs with innovative incentive programs that go beyond trading fee rebates.
+
 
 ## Testing and Development on testnet
 
