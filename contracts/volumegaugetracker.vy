@@ -18,8 +18,9 @@ struct TrackData:
 trackData: public(HashMap[address, TrackData[1000000000000]])
 trackDataSize: public(HashMap[address, uint256])
 
-tokenPrice: public(HashMap[address, HashMap[uint256, uint256]])
-
+# tokenPrice: public(HashMap[address, HashMap[uint256, uint256]])
+lastVolume: public(uint256)
+lastAmount: public(uint256)
 rewardAmount: public(uint256) # based on USD, decimals 8
 
 gauges: public(HashMap[address, bool])
@@ -27,7 +28,19 @@ owner: public(address)
 
 fee: public(uint256)
 
-FEE_DENOMINATOR: constant(uint256) = 10 ** 10
+DENOMINATOR: constant(uint256) = 10 ** 10
+
+@internal
+def get_volume_EMA(_price:uint256, _amount: uint256) -> uint256:
+    lastvolume:uint256 = self.lastVolume
+    lastamount:uint256 = self.lastAmount
+    alpha:uint256 = DENOMINATOR - 2 * DENOMINATOR / (30 + DENOMINATOR)
+    newvolume:uint256 = alpha * lastvolume + (DENOMINATOR - alpha) * _amount * _price
+    newamount:uint256 = alpha * lastamount + (DENOMINATOR - alpha) * _amount
+    self.lastVolume = newvolume
+    self.lastAmount = newamount
+    v_ema:uint256 = newvolume / newamount
+    return v_ema
 
 @external
 def __init__():
@@ -54,20 +67,21 @@ def track(_sender: address,
     self.trackData[_sender][self.trackDataSize[_sender]] = trackdatum
     self.trackDataSize[_sender] += 1
     date: uint256 = block.timestamp / 86400
-    isum: uint256 = 0
-    current_price: uint256 = self.tokenPrice[_tokenx][date]
-    if current_price == 0:
-        self.tokenPrice[_tokenx][date] = _pricex
-        current_price = _pricex
-    token_price: uint256 = 0
-    temp_price: uint256 = 0
-    for i in range(1, 6):
-        temp_price = self.tokenPrice[_tokenx][date - 7 + i] * i
-        if temp_price > 0:
-            token_price += temp_price
-            isum += i
-    token_price = (token_price + current_price * 7) / (isum + 7)
-    self.rewardAmount += token_price * _amountx * self.fee / FEE_DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
+    # isum: uint256 = 0
+    # current_price: uint256 = self.tokenPrice[_tokenx][date]
+    # if current_price == 0:
+    #     self.tokenPrice[_tokenx][date] = _pricex
+    #     current_price = _pricex
+    # token_price: uint256 = 0
+    # temp_price: uint256 = 0
+    # for i in range(1, 6):
+    #     temp_price = self.tokenPrice[_tokenx][date - 7 + i] * i
+    #     if temp_price > 0:
+    #         token_price += temp_price
+    #         isum += i
+    # token_price = (token_price + current_price * 7) / (isum + 7)
+    token_price: uint256 = self.get_volume_EMA(_pricex, _amountx)
+    self.rewardAmount += token_price * _amountx * self.fee / DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
 
 @external
 def set_fee(_fee: uint256):
