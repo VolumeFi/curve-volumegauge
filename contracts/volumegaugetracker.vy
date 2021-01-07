@@ -19,8 +19,17 @@ trackData: public(HashMap[address, TrackData[1000000000000]])
 trackDataSize: public(HashMap[address, uint256])
 
 # tokenPrice: public(HashMap[address, HashMap[uint256, uint256]])
-lastVolume: public(uint256)
-lastAmount: public(uint256)
+lastVolume: public(HashMap[address, uint256])
+lastAmount: public(HashMap[address, uint256])
+lastDate: public(HashMap[address, uint256])
+currentVolume: public(HashMap[address, uint256])
+currentAmount: public(HashMap[address, uint256])
+
+PERIOD: constant(uint256) = 30
+DENOMINATOR: constant(uint256) = 10 ** 10
+SMOOTHING: constant(uint256) = 2
+ALPHA: constant(uint256) = DENOMINATOR - SMOOTHING * DENOMINATOR / (PERIOD + DENOMINATOR)
+DAY: constant(uint256) = 600
 rewardAmount: public(uint256) # based on USD, decimals 8
 
 gauges: public(HashMap[address, bool])
@@ -28,19 +37,6 @@ owner: public(address)
 
 fee: public(uint256)
 
-DENOMINATOR: constant(uint256) = 10 ** 10
-
-@internal
-def get_volume_EMA(_price:uint256, _amount: uint256) -> uint256:
-    lastvolume:uint256 = self.lastVolume
-    lastamount:uint256 = self.lastAmount
-    alpha:uint256 = DENOMINATOR - 2 * DENOMINATOR / (30 + DENOMINATOR)
-    newvolume:uint256 = alpha * lastvolume + (DENOMINATOR - alpha) * _amount * _price
-    newamount:uint256 = alpha * lastamount + (DENOMINATOR - alpha) * _amount
-    self.lastVolume = newvolume
-    self.lastAmount = newamount
-    v_ema:uint256 = newvolume / newamount
-    return v_ema
 
 @external
 def __init__():
@@ -66,22 +62,31 @@ def track(_sender: address,
     trackdatum:TrackData = TrackData({tokenx: _tokenx, pricex: _pricex, amountx: _amountx, tokeny: _tokeny, pricey: _pricey, amounty: _amounty, source_addr: _source_addr, contract_addr: _contract_addr, time_stamp: block.timestamp})
     self.trackData[_sender][self.trackDataSize[_sender]] = trackdatum
     self.trackDataSize[_sender] += 1
-    date: uint256 = block.timestamp / 86400
-    # isum: uint256 = 0
-    # current_price: uint256 = self.tokenPrice[_tokenx][date]
-    # if current_price == 0:
-    #     self.tokenPrice[_tokenx][date] = _pricex
-    #     current_price = _pricex
-    # token_price: uint256 = 0
-    # temp_price: uint256 = 0
-    # for i in range(1, 6):
-    #     temp_price = self.tokenPrice[_tokenx][date - 7 + i] * i
-    #     if temp_price > 0:
-    #         token_price += temp_price
-    #         isum += i
-    # token_price = (token_price + current_price * 7) / (isum + 7)
-    token_price: uint256 = self.get_volume_EMA(_pricex, _amountx)
-    self.rewardAmount += token_price * _amountx * self.fee / DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
+
+    date: uint256 = block.timestamp / DAY
+    lastvolume: uint256 = self.lastVolume[_tokenx]
+    lastamount: uint256 = self.lastAmount[_tokenx]
+    currentvolume: uint256 = 0
+    currentamount: uint256 = 0
+    if self.lastDate[_tokenx] != date:
+        self.lastVolume[_tokenx] = ALPHA * lastvolume + (DENOMINATOR - ALPHA) * self.currentVolume[_tokenx]
+        self.lastAmount[_tokenx] = ALPHA * lastamount + (DENOMINATOR - ALPHA) * self.currentAmount[_tokenx]
+        self.lastDate[_tokenx] = date
+    else:
+        currentvolume = self.currentVolume[_tokenx]
+        currentamount = self.currentAmount[_tokenx]
+
+    newvolume: uint256 = 0
+    newamount: uint256 = 0
+    currentvolume += _amountx * _pricex
+    currentamount += _amountx
+    self.currentVolume[_tokenx] = currentvolume
+    self.currentAmount[_tokenx] = currentamount
+
+    newvolume = ALPHA * lastvolume + (DENOMINATOR - ALPHA) * currentvolume
+    newamount = ALPHA * lastamount + (DENOMINATOR - ALPHA) * currentamount
+    # price_v_ema:uint256 = newvolume / newamount
+    self.rewardAmount += (newvolume / newamount) * _amountx * self.fee / DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
 
 @external
 def set_fee(_fee: uint256):
