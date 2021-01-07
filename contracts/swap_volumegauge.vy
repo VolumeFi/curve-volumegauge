@@ -40,7 +40,6 @@ USE_LENDING: constant(bool[N_COINS]) = [True, True]
 TETHERED: constant(bool[N_COINS]) = [False, False]
 
 
-
 # Events
 event TokenExchange:
     buyer: indexed(address)
@@ -184,7 +183,7 @@ def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
 
     pricex: uint256 = convert(Aggregator(self.aggregators[i]).latestAnswer(), uint256)
     pricey: uint256 = convert(Aggregator(self.aggregators[j]).latestAnswer(), uint256)
-    priceeth: uint256 = convert(Aggregator(self.ethaggregator).latestAnswer(), uint256)
+    priceeth: uint256 = convert(Aggregator(self.ethaggregator).latestAnswer(), uint256) # decimals : 8
     pricex = pricex * priceeth / (10 ** 18)
     pricey = pricey * priceeth / (10 ** 18)
     self.tracker.track(tx.origin, _underlying_coins[i], pricex, dx, _underlying_coins[j], pricey, dy, msg.sender, _base)
