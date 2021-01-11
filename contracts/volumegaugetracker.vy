@@ -6,11 +6,9 @@ interface ERC20:
 
 struct TrackData:
     tokenx: address
-    pricex: uint256
-    amountx: uint256
     tokeny: address
-    pricey: uint256
-    amounty: uint256
+    price: uint256
+    amount: uint256
     source_addr: address
     contract_addr: address
     time_stamp: uint256
@@ -51,17 +49,16 @@ def addGauge(_gauge: address):
 @external
 def track(_sender: address,
     _tokenx: address,
-    _pricex: uint256,
-    _amountx: uint256,
     _tokeny: address,
-    _pricey: uint256,
-    _amounty: uint256,
+    _price: uint256,
+    _amount: uint256,
     _source_addr: address,
     _contract_addr: address):
     assert self.gauges[msg.sender] == True
-    trackdatum:TrackData = TrackData({tokenx: _tokenx, pricex: _pricex, amountx: _amountx, tokeny: _tokeny, pricey: _pricey, amounty: _amounty, source_addr: _source_addr, contract_addr: _contract_addr, time_stamp: block.timestamp})
-    self.trackData[_sender][self.trackDataSize[_sender]] = trackdatum
-    self.trackDataSize[_sender] += 1
+    trackdatum:TrackData = TrackData({tokenx: _tokenx, tokeny: _tokeny, price: _price, amount: _amount, source_addr: _source_addr, contract_addr: _contract_addr, time_stamp: block.timestamp})
+    _length:uint256 = self.trackDataSize[_sender]
+    self.trackData[_sender][_length] = trackdatum
+    self.trackDataSize[_sender] = _length + 1
 
     date: uint256 = block.timestamp / DAY
     lastvolume: uint256 = self.lastVolume[_tokenx]
@@ -77,15 +74,15 @@ def track(_sender: address,
         currentamount = 0
         self.lastDate[_tokenx] = date
 
-    currentvolume += _amountx * _pricex
-    currentamount += _amountx
+    currentvolume += _amount * _price
+    currentamount += _amount
     self.currentVolume[_tokenx] = currentvolume
     self.currentAmount[_tokenx] = currentamount
 
     newvolume_num: uint256 = ALPHA * lastvolume + (DENOMINATOR - ALPHA) * currentvolume # Numerator
     newamount_num: uint256 = ALPHA * lastamount + (DENOMINATOR - ALPHA) * currentamount # Numerator
     price_v_ema:uint256 = newvolume_num / newamount_num
-    self.rewardAmount += price_v_ema * _amountx * self.fee / DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
+    self.rewardAmount += price_v_ema * _amount * self.fee / DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
 
 @external
 def set_fee(_fee: uint256):
