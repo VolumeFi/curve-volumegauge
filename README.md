@@ -12,7 +12,7 @@ VolumeGauges use [Volume-weighted Exponential Moving Average](https://www.financ
 ## Testing and Development on testnet
 
 ### Dependencies
-
+* [nodejs](https://nodejs.org/en/download/) - >=v8, tested with version v14.15.4
 * [python3](https://www.python.org/downloads/release/python-368/) from version 3.6 to 3.8, python3-dev
 * [brownie](https://github.com/iamdefinitelyahuman/brownie) - tested with version [1.12.0](https://github.com/eth-brownie/brownie/releases/tag/v1.12.0)
 
@@ -28,26 +28,25 @@ cd volumegauge
 pip install -r requirements.txt
 ```
 
-### Restore account
+### Ganache-cli
+
+Install Node.js(>=v8) and ganache-cli globally.
 
 ```bash
-brownie accounts import tester keystore
+npm install -g ganache-cli
 ```
-
-account password : 12345678
-
-### Modify brownie infura API key
 
 ```bash
-brownie networks modify rinkeby host=https://rinkeby.infura.io/v3/1755ac442e6849a98568b6a9f7d191a0
+ganache-cli --fork https://mainnet.infura.io/v3/1755ac442e6849a98568b6a9f7d191a0 -p 7545
 ```
 
-### Deployment on Rinkeby testnet
+And wait until local RPC is ready.(a few seconds)
 
-
+### Brownie network setting
 ```bash
-brownie run rinkeby_deploy
+brownie networks add Development forkedmain host=http://127.0.0.1 accounts=10 evm_version=istanbul fork=mainnet port=7545 mnemonic=brownie cmd=ganache-cli timeout=300
 ```
+
 
 ### Running the Tests
 

@@ -143,7 +143,7 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     pricecrv: uint256 = 10 ** 36 / convert(Aggregator(_crvaggregator).latestAnswer(), uint256) # decimals : CRV price of 1 USD
 
     pricex = pricex * pricecrv / (10 ** 18) # CRV Price of USD Token
-    
+
     exchangeratex: uint256 = cERC20(_coins[i]).exchangeRateStored() / (10 ** ERC20(_underlying_coins[i]).decimals())
     exchangeratey: uint256 = cERC20(_coins[j]).exchangeRateStored() / (10 ** ERC20(_underlying_coins[j]).decimals())
     pricex = pricex * exchangeratex / 10 ** 10 # ExchangeRate decimals : 10

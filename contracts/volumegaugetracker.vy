@@ -13,7 +13,7 @@ struct TrackData:
     contract_addr: address
     time_stamp: uint256
 
-trackData: public(HashMap[address, TrackData[1000000000000]])
+trackData: public(HashMap[address, HashMap[uint256, TrackData]])
 trackDataSize: public(HashMap[address, uint256])
 
 # tokenPrice: public(HashMap[address, HashMap[uint256, uint256]])
