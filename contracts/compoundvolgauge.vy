@@ -47,6 +47,7 @@ event TokenExchangeUnderlying:
 
 coins: public(address[N_COINS])
 underlying_coins: public(address[N_COINS])
+underlying_coin_decimals: uint256[N_COINS]
 base: public(address)
 tracker: public(Tracker)
 usdaggregator: public(address)
@@ -75,6 +76,7 @@ def __init__(
         assert _underlying_coins[i] != ZERO_ADDRESS
         ERC20(_coins[i]).approve(_base, MAX_UINT256)
         ERC20(_underlying_coins[i]).approve(_base, MAX_UINT256)
+        self.underlying_coin_decimals[i] = ERC20(_underlying_coins[i]).decimals()
     self.usdaggregator = _usdaggregator
     self.crvaggregator = _crvaggregator
     self.coins = _coins
@@ -104,9 +106,9 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     _coins: address[N_COINS] = self.coins
     _underlying_coins: address[N_COINS] = self.underlying_coins
     _base:address =  self.base
-    _usdaggregator: address= self.usdaggregator
-    _crvaggregator: address= self.crvaggregator
-
+    _usdaggregator: address = self.usdaggregator
+    _crvaggregator: address = self.crvaggregator
+    _underlying_coin_decimals: uint256[N_COINS] = self.underlying_coin_decimals
     # "safeTransferFrom" which works for ERC20s which return bool or not
     _response: Bytes[32] = raw_call(
         _coins[i],
@@ -144,8 +146,8 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
 
     pricex = pricex * pricecrv / (10 ** 18) # CRV Price of USD Token
 
-    exchangeratex: uint256 = cERC20(_coins[i]).exchangeRateStored() / (10 ** ERC20(_underlying_coins[i]).decimals())
-    exchangeratey: uint256 = cERC20(_coins[j]).exchangeRateStored() / (10 ** ERC20(_underlying_coins[j]).decimals())
+    exchangeratex: uint256 = cERC20(_coins[i]).exchangeRateStored() / (10 ** _underlying_coin_decimals[i])
+    exchangeratey: uint256 = cERC20(_coins[j]).exchangeRateStored() / (10 ** _underlying_coin_decimals[j])
     pricex = pricex * exchangeratex / 10 ** 10 # ExchangeRate decimals : 10
     self.tracker.track(tx.origin, _coins[i], _coins[j], pricex, dx, msg.sender, _base)
 
