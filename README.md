@@ -42,7 +42,7 @@ ganache-cli --fork https://mainnet.infura.io/v3/1755ac442e6849a98568b6a9f7d191a0
 
 And wait until local RPC is ready.(a few seconds)
 
-### Brownie network setting
+### Brownie network setting (only once in the beginning)
 ```bash
 brownie networks add Development forkedmain host=http://127.0.0.1 accounts=10 evm_version=istanbul fork=mainnet port=7545 mnemonic=brownie cmd=ganache-cli timeout=300
 ```
