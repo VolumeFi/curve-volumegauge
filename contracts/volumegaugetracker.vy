@@ -67,7 +67,7 @@ def track(_sender: address,
     lastvolumedata: LastVolumeData = self.lastVolumeData[_tokenx]
     currentvolumedata: CurrentVolumeData = self.currentVolumeData[_tokenx]
 
-    if lastvolumedata.date != date:
+    if lastvolumedata.date < date:
         lastvolumedata.volume = (ALPHA * lastvolumedata.volume + (DENOMINATOR - ALPHA) * currentvolumedata.volume) / DENOMINATOR
         lastvolumedata.amount = (ALPHA * lastvolumedata.amount + (DENOMINATOR - ALPHA) * currentvolumedata.amount) / DENOMINATOR
         lastvolumedata.date = date

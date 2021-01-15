@@ -118,7 +118,6 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
 @external
 @nonreentrant('lock')
 def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
-    underlying_coin_units:uint256[N_COINS] = UNDERLYING_UNITS
     underlying_coins: address[N_COINS] = UNDERLYING_COINS
     # "safeTransferFrom" which works for ERC20s which return bool or not
     _response: Bytes[32] = raw_call(
@@ -159,11 +158,3 @@ def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
     pricex = pricex * pricecrv / (10 ** 18) # CRV Price of Token
     
     self.tracker.track(tx.origin, underlying_coins[i], underlying_coins[j], pricex, dx, dy, msg.sender, BASE)
-
-@external
-def approveAllToBase():
-    coins: address[N_COINS] = COINS
-    underlying_coins: address[N_COINS] = UNDERLYING_COINS
-    for i in range(N_COINS):
-        ERC20(coins[i]).approve(BASE, MAX_UINT256)
-        ERC20(underlying_coins[i]).approve(BASE, MAX_UINT256)

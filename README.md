@@ -37,7 +37,7 @@ npm install -g ganache-cli
 ```
 
 ```bash
-ganache-cli --fork https://mainnet.infura.io/v3/1755ac442e6849a98568b6a9f7d191a0 -p 7545
+ganache-cli --fork https://mainnet.infura.io/v3/$YOUR_INFURA_KEY -p 7545
 ```
 
 And wait until local RPC is ready.(a few seconds)
