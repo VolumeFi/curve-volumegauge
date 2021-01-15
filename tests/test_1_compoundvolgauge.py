@@ -54,7 +54,7 @@ def test_exchange_cusdc_to_cdai(_compoundvolgauge, compoundpool, cUSDC, tracker,
         print("price_by_volume_EMA* : " + str(price_v_ema / DENOMINATOR) + " CRV")
         print("reward_amount : " + str(current_reward_amount) + " (" + str(current_reward_amount / DENOMINATOR) + " CRV)")
         print("increased_reward_amount_in_CRV : " + str(float(current_reward_amount - last_reward_amount) / DENOMINATOR) + " CRV")
-    
+
 def test_exchange_underlying_dai_to_usdc(_compoundvolgauge, compoundpool, DAI, tracker, accounts):
     for i in range(5):
         print("Attemp #" + str(i + 1) + " .....")
@@ -78,7 +78,7 @@ def test_exchange_underlying_dai_to_usdc(_compoundvolgauge, compoundpool, DAI, t
         print("price_by_volume_EMA* : " + str(price_v_ema / DENOMINATOR) + " CRV")
         print("reward_amount : " + str(current_reward_amount) + " (" + str(current_reward_amount / DENOMINATOR) + " CRV)")
         print("increased_reward_amount_in_CRV : " + str(float(current_reward_amount - last_reward_amount) / DENOMINATOR) + " CRV")
-    
+
 def test_exchange_underlying_usdc_to_dai(_compoundvolgauge, compoundpool, USDC, tracker, accounts):
     for i in range(5):
         print("Attemp #" + str(i + 1) + " .....")

@@ -106,5 +106,5 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     pricecrv: uint256 = 10 ** 36 / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # decimals : CRV price of 1 USD
 
     pricex = pricex * pricecrv / (10 ** 18) # CRV Price of Token
-    
+
     self.tracker.track(tx.origin, coins[i], coins[j], pricex, dx, dy, msg.sender, BASE)
