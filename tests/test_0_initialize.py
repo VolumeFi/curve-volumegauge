@@ -2,11 +2,12 @@
 
 import pytest
 
-def test_init(UniswapRouter, WETH, DAI, USDC, USDT, TUSD, cDAI, cUSDC, yDAI, yUSDC, yUSDT, yTUSD, _compoundvolgauge, compoundpool, _threepoolvolgauge, threepool, _yvolgauge, ypool, accounts):
+def test_init(UniswapRouter, WETH, DAI, USDC, USDT, TUSD, USDN, CRV3, renBTC, WBTC, cDAI, cUSDC, yDAI, yUSDC, yUSDT, yTUSD, _compoundvolgauge, compoundpool, _threepoolvolgauge, threepool, _yvolgauge, ypool, _usdnvolgauge, usdnpool, _renvolgauge, renpool, accounts):
     UniswapRouter.swapETHForExactTokens(3000 * 10 ** 18, [WETH, DAI], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 15 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(3000 * 10 ** 6 , [WETH, USDC], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 15 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(3000 * 10 ** 6 , [WETH, USDT], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(2000 * 10 ** 18 , [WETH, TUSD], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
+    UniswapRouter.swapETHForExactTokens(1000 * 10 ** 18 , [WETH, USDN], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
 
     DAI.approve(cDAI, 2 ** 256 - 1, {'from' : accounts[0]})
     USDC.approve(cUSDC, 2 ** 256 - 1, {'from' : accounts[0]})
@@ -57,3 +58,17 @@ def test_init(UniswapRouter, WETH, DAI, USDC, USDT, TUSD, cDAI, cUSDC, yDAI, yUS
     yUSDC.approve(ypool, 2 ** 256 - 1, {'from' : accounts[0]})
     yUSDT.approve(ypool, 2 ** 256 - 1, {'from' : accounts[0]})
     yTUSD.approve(ypool, 2 ** 256 - 1, {'from' : accounts[0]})
+
+    threepool.add_liquidity([0, 0, 1000 * 10 ** 6], 0, {'from' : accounts[0]})
+
+    USDN.approve(_usdnvolgauge, 2 ** 256 - 1, {'from' : accounts[0]})
+    CRV3.approve(_usdnvolgauge, 2 ** 256 - 1, {'from' : accounts[0]})
+    DAI.approve(_usdnvolgauge, 2 ** 256 - 1, {'from' : accounts[0]})
+    USDC.approve(_usdnvolgauge, 2 ** 256 - 1, {'from' : accounts[0]})
+    USDT.approve(_usdnvolgauge, 2 ** 256 - 1, {'from' : accounts[0]})
+
+    USDN.approve(usdnpool, 2 ** 256 - 1, {'from' : accounts[0]})
+    CRV3.approve(usdnpool, 2 ** 256 - 1, {'from' : accounts[0]})
+    DAI.approve(usdnpool, 2 ** 256 - 1, {'from' : accounts[0]})
+    USDC.approve(usdnpool, 2 ** 256 - 1, {'from' : accounts[0]})
+    USDT.approve(usdnpool, 2 ** 256 - 1, {'from' : accounts[0]})

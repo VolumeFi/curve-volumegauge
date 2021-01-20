@@ -30,14 +30,17 @@ interface Aggregator:
 
 
 # This can (and needs to) be changed at compile time
-N_COINS: constant(int128) = 5  # <- change
+N_COINS: constant(int128) = 2  # <- change
+MAX_COIN: constant(int128) = N_COINS - 1
+BASE_POOL_COINS: constant(int128) = 3
 BASE: constant(address) = 0x0f9cb53Ebe405d49A0bbdBD291A65Ff571bC83e1
 USDN: constant(address) = 0x674C6Ad92Fd080e4004b2312b45f796a192D27a0
 CRV3: constant(address) = 0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490
 DAI: constant(address) = 0x6B175474E89094C44Da98b954EedeAC495271d0F
 USDC: constant(address) = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
 USDT: constant(address) = 0xdAC17F958D2ee523a2206206994597C13D831ec7
-COINS: constant(address[N_COINS]) = [USDN, CRV3, DAI, USDC, USDT]
+COINS: constant(address[N_COINS]) = [USDN, CRV3]
+BASE_COINS: constant(address[BASE_POOL_COINS]) = [DAI, USDC, USDT]
 ETHUSDAGGREGATOR: constant(address) = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
 CRVETHAGGREGATOR: constant(address) = 0x8a12Be339B0cD1829b91Adc01977caa5E9ac121e
 
@@ -56,8 +59,11 @@ def __init__(_tracker: address, _usdaggregator: address, _crvaggregator: address
     @param _crvaggregator Address of aggregators to get CRV/ETH
     """
     coins: address[N_COINS] = COINS
+    base_coins: address[BASE_POOL_COINS] = BASE_COINS
     for i in range(N_COINS):
         ERC20(coins[i]).approve(BASE, MAX_UINT256)
+    for i in range(BASE_POOL_COINS):
+        ERC20(base_coins[i]).approve(BASE, MAX_UINT256)
     self.tracker = Tracker(_tracker)
     self.usdaggregator = _usdaggregator
     self.crvaggregator = _crvaggregator
@@ -99,12 +105,8 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     if len(_response) > 0:
         assert convert(_response, bool)  # dev: failed transfer
 
-    # pricex: uint256 = 10 ** 26 / convert(Aggregator(ETHUSDAGGREGATOR).latestAnswer(), uint256) # 10 ** 18 ETH price of 1 USD
-    # pricecrv: uint256 = 10 ** 36 / convert(Aggregator(CRVETHAGGREGATOR).latestAnswer(), uint256) # decimals : CRV price of 1 USD
-    pricex: uint256 = 10 ** 26 / convert(Aggregator(self.usdaggregator).latestAnswer(), uint256) # 10 ** 18 ETH price of 1 USD
-    pricecrv: uint256 = 10 ** 36 / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # decimals : CRV price of 1 USD
-
-    pricex = pricex * pricecrv / (10 ** 18) # CRV Price of USD Token
+    # pricex:uint256 = 10 ** 44 / convert(Aggregator(ETHUSDAGGREGATOR).latestAnswer(), uint256) / convert(Aggregator(CRVETHAGGREGATOR).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
+    pricex:uint256 = 10 ** 44 / convert(Aggregator(self.usdaggregator).latestAnswer(), uint256) / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
 
     # pricex = pricex * yERC20(coins[i]).getPricePerFullShare() / 10 ** 18 # ExchangeRate decimals : 18
 
@@ -114,10 +116,27 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
 @nonreentrant('lock')
 def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
     coins: address[N_COINS] = COINS
+    base_coins: address[BASE_POOL_COINS] = BASE_COINS
+    # Use base_i or base_j if they are >= 0
+    base_i: int128 = i - MAX_COIN
+    base_j: int128 = j - MAX_COIN
+
+    # Addresses for input and output coins
+    input_coin: address = ZERO_ADDRESS
+    if base_i < 0:
+        input_coin = coins[i]
+    else:
+        input_coin = base_coins[base_i]
+
+    output_coin: address = ZERO_ADDRESS
+    if base_j < 0:
+        output_coin = coins[j]
+    else:
+        output_coin = base_coins[base_j]
 
     # "safeTransferFrom" which works for ERC20s which return bool or not
     _response: Bytes[32] = raw_call(
-        coins[i],
+        input_coin,
         concat(
             method_id("transferFrom(address,address,uint256)"),
             convert(msg.sender, bytes32),
@@ -131,11 +150,11 @@ def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
 
     SWAP(BASE).exchange_underlying(i, j, dx, min_dy)
 
-    dy: uint256 = ERC20(coins[j]).balanceOf(self)
+    dy: uint256 = ERC20(output_coin).balanceOf(self)
 
     # "safeTransfer" which works for ERC20s which return bool or not
     _response = raw_call(
-        coins[j],
+        output_coin,
         concat(
             method_id("transfer(address,uint256)"),
             convert(msg.sender, bytes32),
@@ -149,4 +168,4 @@ def exchange_underlying(i: int128, j: int128, dx: uint256, min_dy: uint256):
     # pricex:uint256 = 10 ** 44 / convert(Aggregator(ETHUSDAGGREGATOR).latestAnswer(), uint256) / convert(Aggregator(CRVETHAGGREGATOR).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
     pricex:uint256 = 10 ** 44 / convert(Aggregator(self.usdaggregator).latestAnswer(), uint256) / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
     
-    self.tracker.track(tx.origin, coins[i], coins[j], pricex, dx, dy, msg.sender, BASE)
+    self.tracker.track(tx.origin, input_coin, output_coin, pricex, dx, dy, msg.sender, BASE)
