@@ -17,6 +17,6 @@ def __init__(_baseAggregator: address):
 @external
 @view
 def latestAnswer() -> int128:
-    random:int128 = convert(convert(keccak256(convert(block.number, bytes32)), uint256) % 201, int128)
+    random:int128 = convert(convert(keccak256(convert(block.number + convert(self, uint256), bytes32)), uint256) % 201, int128)
     _latestAnswer:int128 = Aggregator(self.baseAggregator).latestAnswer() * (900 + random) / 1000
     return _latestAnswer
