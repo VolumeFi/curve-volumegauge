@@ -1,10 +1,8 @@
 # @version ^0.2.0
 
-# VolumeGauge for y
+# VolumeGauge for usdn
 
 # External Contracts
-# interface yERC20:
-#     def getPricePerFullShare() -> uint256: view
 
 interface ERC20:
     def balanceOf(arg0: address) -> uint256: view

@@ -16,7 +16,7 @@ def test_exchange_cdai_to_cusdc(_compoundvolgauge, compoundpool, cDAI, tracker, 
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = compoundpool.exchange(0, 1, 2000 * 10 ** 8, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(cDAI)
         last_volume = lastvolumedata[0]
@@ -40,7 +40,7 @@ def test_exchange_cusdc_to_cdai(_compoundvolgauge, compoundpool, cUSDC, tracker,
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = compoundpool.exchange(1, 0, 2000 * 10 ** 8, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(cUSDC)
         last_volume = lastvolumedata[0]
@@ -64,7 +64,7 @@ def test_exchange_underlying_dai_to_usdc(_compoundvolgauge, compoundpool, DAI, t
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = compoundpool.exchange_underlying(0, 1, 50 * 10 ** 18, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(DAI)
         last_volume = lastvolumedata[0]
@@ -88,7 +88,7 @@ def test_exchange_underlying_usdc_to_dai(_compoundvolgauge, compoundpool, USDC, 
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = compoundpool.exchange_underlying(1, 0, 50 * 10 ** 6, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(USDC)
         last_volume = lastvolumedata[0]

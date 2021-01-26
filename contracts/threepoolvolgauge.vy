@@ -99,12 +99,7 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
     if len(_response) > 0:
         assert convert(_response, bool)  # dev: failed transfer
 
-    # pricex: uint256 = 10 ** 26 / convert(Aggregator(ETHUSDAGGREGATOR).latestAnswer(), uint256) # 10 ** 18 ETH price of 1 USD
-    # pricecrv: uint256 = 10 ** 36 / convert(Aggregator(CRVETHAGGREGATOR).latestAnswer(), uint256) # decimals : CRV price of 1 USD
-
-    pricex: uint256 = 10 ** 26 / convert(Aggregator(self.usdaggregator).latestAnswer(), uint256) # 10 ** 18 ETH price of 1 USD
-    pricecrv: uint256 = 10 ** 36 / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # decimals : CRV price of 1 USD
-
-    pricex = pricex * pricecrv / (10 ** 18) # CRV Price of Token
+    # pricex:uint256 = 10 ** 44 / convert(Aggregator(ETHUSDAGGREGATOR).latestAnswer(), uint256) / convert(Aggregator(CRVETHAGGREGATOR).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
+    pricex:uint256 = 10 ** 44 / convert(Aggregator(self.usdaggregator).latestAnswer(), uint256) / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
 
     self.tracker.track(tx.origin, coins[i], coins[j], pricex, dx, dy, msg.sender, BASE)

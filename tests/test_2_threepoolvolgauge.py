@@ -16,7 +16,7 @@ def test_exchange_dai_to_usdc(_threepoolvolgauge, threepool, DAI, tracker, accou
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = threepool.exchange(0, 1, 50 * 10 ** 18, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(DAI)
         last_volume = lastvolumedata[0]
@@ -40,7 +40,7 @@ def test_exchange_usdc_to_dai(_threepoolvolgauge, threepool, USDC, tracker, acco
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = threepool.exchange(1, 0, 50 * 10 ** 6, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(USDC)
         last_volume = lastvolumedata[0]
@@ -64,7 +64,7 @@ def test_exchange_dai_to_usdt(_threepoolvolgauge, threepool, DAI, tracker, accou
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = threepool.exchange(0, 2, 50 * 10 ** 18, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(DAI)
         last_volume = lastvolumedata[0]
@@ -88,7 +88,7 @@ def test_exchange_usdt_to_dai(_threepoolvolgauge, threepool, USDT, tracker, acco
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = threepool.exchange(2, 0, 50 * 10 ** 6, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(USDT)
         last_volume = lastvolumedata[0]
@@ -112,7 +112,7 @@ def test_exchange_usdc_to_usdt(_threepoolvolgauge, threepool, USDC, tracker, acc
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = threepool.exchange(1, 2, 50 * 10 ** 6, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(USDC)
         last_volume = lastvolumedata[0]
@@ -136,7 +136,7 @@ def test_exchange_usdt_to_usdc(_threepoolvolgauge, threepool, USDT, tracker, acc
         print("VGaugeGas : " + str(vgas) + " Unit")
         tx = threepool.exchange(2, 1, 50 * 10 ** 6, 0, {'from': accounts[0]})
         print("OriginGas : " + str(tx.gas_used) + " Unit")
-        print("IncreasedGas : " + str(vgas - tx.gas_used) + " Unit")
+        print("ConsumedGasByVolumeGauge : " + str(vgas - tx.gas_used) + " Unit")
         current_reward_amount = tracker.rewardAmount()
         lastvolumedata = tracker.lastVolumeData(USDT)
         last_volume = lastvolumedata[0]

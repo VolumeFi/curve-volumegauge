@@ -1,13 +1,11 @@
 # @version ^0.2.0
 
-# VolumeGauge for compound
+# VolumeGauge for susd
 
 # External Contracts
-interface cERC20:
-    def exchangeRateStored() -> uint256: view
-
 interface ERC20:
     def balanceOf(arg0: address) -> uint256: view
+    def allowance(_owner: address, _spender: address) -> uint256: view
     def approve(_spender: address, _value:uint256): nonpayable
     def decimals() -> uint256: view
 
@@ -30,17 +28,17 @@ interface Aggregator:
 
 
 # This can (and needs to) be changed at compile time
-N_COINS: constant(int128) = 2  # <- change
-BASE: constant(address) = 0xA2B47E3D5c44877cca798226B7B8118F9BFb7A56
-cDAI: constant(address) = 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643
-cUSDC: constant(address) = 0x39AA39c021dfbaE8faC545936693aC917d5E7563
+N_COINS: constant(int128) = 4  # <- change
+BASE: constant(address) = 0xA5407eAE9Ba41422680e2e00537571bcC53efBfD
 DAI: constant(address) = 0x6B175474E89094C44Da98b954EedeAC495271d0F
 USDC: constant(address) = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48
-COINS: constant(address[N_COINS]) = [cDAI, cUSDC]
-UNDERLYING_COINS: constant(address[N_COINS]) = [DAI, USDC]
+USDT: constant(address) = 0xdAC17F958D2ee523a2206206994597C13D831ec7
+sUSD: constant(address) = 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51
+COINS: constant(address[N_COINS]) = [DAI, USDC, USDT, sUSD]
+UNDERLYING_COINS: constant(address[N_COINS]) = [DAI, USDC, USDT, sUSD]
 ETHUSDAGGREGATOR: constant(address) = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
 CRVETHAGGREGATOR: constant(address) = 0x8a12Be339B0cD1829b91Adc01977caa5E9ac121e
-UNDERLYING_UNITS: constant(uint256[N_COINS]) = [10 ** 18, 10 ** 6]
+
 
 
 tracker: public(Tracker)
@@ -60,7 +58,8 @@ def __init__(_tracker: address, _usdaggregator: address, _crvaggregator: address
     underlying_coins: address[N_COINS] = UNDERLYING_COINS
     for i in range(N_COINS):
         ERC20(coins[i]).approve(BASE, MAX_UINT256)
-        ERC20(underlying_coins[i]).approve(BASE, MAX_UINT256)
+        if ERC20(underlying_coins[i]).allowance(self, BASE) == 0:
+            ERC20(underlying_coins[i]).approve(BASE, MAX_UINT256)
     self.tracker = Tracker(_tracker)
     self.usdaggregator = _usdaggregator
     self.crvaggregator = _crvaggregator
@@ -68,8 +67,8 @@ def __init__(_tracker: address, _usdaggregator: address, _crvaggregator: address
 @external
 @nonreentrant('lock')
 def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
-    underlying_coin_units:uint256[N_COINS] = UNDERLYING_UNITS
     coins: address[N_COINS] = COINS
+
     # "safeTransferFrom" which works for ERC20s which return bool or not
     _response: Bytes[32] = raw_call(
         coins[i],
@@ -104,9 +103,6 @@ def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256):
 
     # pricex:uint256 = 10 ** 44 / convert(Aggregator(ETHUSDAGGREGATOR).latestAnswer(), uint256) / convert(Aggregator(CRVETHAGGREGATOR).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
     pricex:uint256 = 10 ** 44 / convert(Aggregator(self.usdaggregator).latestAnswer(), uint256) / convert(Aggregator(self.crvaggregator).latestAnswer(), uint256) # 18(CRV/ETH) + 8(ETH/USD) + 18 = 44
-
-    exchangeratex: uint256 = cERC20(coins[i]).exchangeRateStored() / underlying_coin_units[i]
-    pricex = pricex * exchangeratex / 10 ** 10 # ExchangeRate decimals : 10
 
     self.tracker.track(tx.origin, coins[i], coins[j], pricex, dx, dy, msg.sender, BASE)
 
