@@ -7,7 +7,6 @@ interface ERC20:
     def balanceOf(arg0: address) -> uint256: view
     def allowance(_owner: address, _spender: address) -> uint256: view
     def approve(_spender: address, _value:uint256): nonpayable
-    def decimals() -> uint256: view
 
 interface SWAP:
     def exchange(i: int128, j: int128, dx: uint256, min_dy: uint256): nonpayable

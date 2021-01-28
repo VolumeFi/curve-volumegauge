@@ -21,6 +21,7 @@ SMOOTHING: constant(uint256) = 2
 ALPHA: constant(uint256) = DENOMINATOR - SMOOTHING * DENOMINATOR / (PERIOD + 1)
 DAY: constant(uint256) = 60 # 60 for test - 1 minute # 86400 for real
 FEE: constant(uint256) = 2 * 10 ** 14
+ETH: constant(address) = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
 
 
 event ExchangeTrack:
@@ -82,6 +83,9 @@ def track(_sender: address,
     newvolume_num: uint256 = ALPHA * lastvolumedata.volume + (DENOMINATOR - ALPHA) * currentvolumedata.volume # Numerator
     newamount_num: uint256 = ALPHA * lastvolumedata.amount + (DENOMINATOR - ALPHA) * currentvolumedata.amount # Numerator
     price_v_ema:uint256 = newvolume_num / newamount_num
-    self.rewardAmount += price_v_ema * _amountx * FEE / DENOMINATOR / 10 ** ERC20(_tokenx).decimals()
+    decimals: uint256 = 18
+    if (_tokenx != ETH):
+        decimals = ERC20(_tokenx).decimals()
+    self.rewardAmount += price_v_ema * _amountx * FEE / DENOMINATOR / 10 ** decimals
 
     log ExchangeTrack(_sender, _tokenx, _tokeny, _pricex, _amountx, _amounty, _source_addr, _contract_addr)

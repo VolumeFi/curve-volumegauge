@@ -2,13 +2,14 @@
 
 import pytest
 
-def test_init(UniswapRouter, WETH, DAI, USDC, USDT, TUSD, USDN, sUSD, CRV3, renBTC, WBTC, cDAI, cUSDC, yDAI, yUSDC, yUSDT, yTUSD, _compoundvolgauge, compoundpool, _threepoolvolgauge, threepool, _yvolgauge, ypool, _usdnvolgauge, usdnpool, _renvolgauge, renpool, _susdvolgauge, susdpool, accounts):
+def test_init(UniswapRouter, WETH, DAI, USDC, USDT, TUSD, USDN, sUSD, sETH, CRV3, renBTC, WBTC, cDAI, cUSDC, yDAI, yUSDC, yUSDT, yTUSD, _compoundvolgauge, compoundpool, _threepoolvolgauge, threepool, _yvolgauge, ypool, _usdnvolgauge, usdnpool, _renvolgauge, renpool, _susdvolgauge, susdpool, _sethvolgauge, sethpool, accounts):
     UniswapRouter.swapETHForExactTokens(3000 * 10 ** 18, [WETH, DAI], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 15 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(3000 * 10 ** 6 , [WETH, USDC], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 15 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(3000 * 10 ** 6 , [WETH, USDT], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(2000 * 10 ** 18 , [WETH, TUSD], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
-    UniswapRouter.swapETHForExactTokens(1000 * 10 ** 18 , [WETH, USDN], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
-    UniswapRouter.swapETHForExactTokens(1000 * 10 ** 18 , [WETH, sUSD], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
+    UniswapRouter.swapETHForExactTokens(1000 * 10 ** 18 , [WETH, USDN], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 5 * 10 ** 18})
+    UniswapRouter.swapETHForExactTokens(1000 * 10 ** 18 , [WETH, sUSD], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 5 * 10 ** 18})
+    UniswapRouter.swapETHForExactTokens(10 * 10 ** 18 , [WETH, sETH], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 15 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(10 ** 7, [WETH, renBTC], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
     UniswapRouter.swapETHForExactTokens(10 ** 7, [WETH, WBTC], accounts[0], 2 ** 256 - 1, {'from' : accounts[0], 'value': 10 * 10 ** 18})
 
@@ -91,3 +92,7 @@ def test_init(UniswapRouter, WETH, DAI, USDC, USDT, TUSD, USDN, sUSD, CRV3, renB
     USDC.approve(susdpool, 2 ** 256 - 1, {'from' : accounts[0]})
     USDT.approve(susdpool, 2 ** 256 - 1, {'from' : accounts[0]})
     sUSD.approve(susdpool, 2 ** 256 - 1, {'from' : accounts[0]})
+
+    sETH.approve(_sethvolgauge, 2 ** 256 - 1, {'from' : accounts[0]})
+
+    sETH.approve(sethpool, 2 ** 256 - 1, {'from' : accounts[0]})
